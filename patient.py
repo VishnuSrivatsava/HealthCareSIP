@@ -59,8 +59,7 @@ def show_patient_details(list_of_patients):
 # class containing all the fields and methods required to work with the patients' table in the database
 class Patient:
 
-    def __init__(self):
-        
+    def __init__(self):        
         self.id = str()
         self.name = str()
         self.age = int()
@@ -72,7 +71,7 @@ class Patient:
         self.date_of_registration = str()
         self.time_of_registration = str()
         self.email_id = str()
-        # self.aadhar_or_voter_id = str()
+        #self.aadhar_or_voter_id = str()
         self.height = int()
         self.weight = int()
         # self.next_of_kin_name = str()
@@ -157,6 +156,7 @@ class Patient:
                 conn.close()  
             else:          
                 st.error('Please enter the patient details')
+            
 
     # method to update an existing patient record in the database
     def update_patient(self):
@@ -183,6 +183,7 @@ class Patient:
                 show_patient_details(c.fetchall())
 
             st.write('Enter new details of the patient:')
+            self.name=st.text_input('Name')
             self.contact_number_1 = st.text_input('Contact number')
             contact_number_2 = st.text_input('Alternate contact number (optional)')
             self.contact_number_2 = (lambda phone : None if phone == '' else phone)(contact_number_2)
