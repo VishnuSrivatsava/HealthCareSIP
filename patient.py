@@ -64,8 +64,7 @@ class Patient:
         self.id = str()
         self.name = str()
         self.age = int()
-        self.gender = str()
-        
+        self.gender = str()        
         self.contact_number_1 = str()
         self.contact_number_2 = str()
         self.date_of_birth = str()
@@ -88,7 +87,7 @@ class Patient:
     def add_patient(self):
         st.write('Enter patient details:')
         self.name = st.text_input('Full name')
-        gender = st.text_input('Gender')
+        gender = st.radio('Gender', ['Female', 'Male', 'Other'])
         self.gender = gender
         dob = st.date_input('Date of birth (YYYY/MM/DD)')
         st.info('If the required date is not in the calendar, please type it in the box above.')
@@ -114,47 +113,50 @@ class Patient:
 
         # executing SQLite statements to save the new patient record to the database
         if save:
-            conn, c = db.connection()
-            with conn:
-                c.execute(
-                    """
-                    INSERT INTO patient_record
-                    (
-                        id, name, age, gender, date_of_birth, blood_group,
-                        contact_number_1, contact_number_2, 
-                        weight, height, address,city, state, pin_code,
+            if self.name!='':                
+                conn, c = db.connection()
+                with conn:
+                    c.execute(
+                        """
+                        INSERT INTO patient_record
+                        (
+                            id, name, age, gender, date_of_birth, blood_group,
+                            contact_number_1, contact_number_2, 
+                            weight, height, address,city, state, pin_code,
                         
-                        email_id,
-                        date_of_registration, time_of_registration
+                            email_id,
+                            date_of_registration, time_of_registration
+                        )
+                        VALUES (
+                            :id, :name, :age, :gender, :dob, :blood_group,
+                            :phone_1, :phone_2, :weight, :height,
+                            :address, :city, :state, :pin,
+                            :email_id,
+                            :reg_date, :reg_time
+                        );
+                        """,
+                        {
+                            'id': self.id, 'name': self.name, 'age': self.age,
+                            'gender': self.gender, 'dob': self.date_of_birth,
+                            'blood_group': self.blood_group,
+                            'phone_1': self.contact_number_1,
+                            'phone_2': self.contact_number_2,
+                             'weight': self.weight,
+                            'height': self.height, 'address': self.address,
+                            'city': self.city, 'state': self.state,
+                            'pin': self.pin_code, 
+                        
+                        
+                            'email_id': self.email_id,
+                            'reg_date': self.date_of_registration,
+                            'reg_time': self.time_of_registration
+                        }
                     )
-                    VALUES (
-                        :id, :name, :age, :gender, :dob, :blood_group,
-                        :phone_1, :phone_2, :weight, :height,
-                        :address, :city, :state, :pin,
-                        :email_id,
-                        :reg_date, :reg_time
-                    );
-                    """,
-                    {
-                        'id': self.id, 'name': self.name, 'age': self.age,
-                        'gender': self.gender, 'dob': self.date_of_birth,
-                        'blood_group': self.blood_group,
-                        'phone_1': self.contact_number_1,
-                        'phone_2': self.contact_number_2,
-                         'weight': self.weight,
-                        'height': self.height, 'address': self.address,
-                        'city': self.city, 'state': self.state,
-                        'pin': self.pin_code, 
-                        
-                        
-                        'email_id': self.email_id,
-                        'reg_date': self.date_of_registration,
-                        'reg_time': self.time_of_registration
-                    }
-                )
-            st.success('Patient details saved successfully.')
-            st.write('Your Patient ID is: ', self.id)
-            conn.close()
+                st.success('Patient details saved successfully.')
+                st.write('Your Patient ID is: ', self.id)
+                conn.close()  
+            else:          
+                st.error('Please enter the patient details')
 
     # method to update an existing patient record in the database
     def update_patient(self):
@@ -199,47 +201,50 @@ class Patient:
 
             # executing SQLite statements to update this patient's record in the database
             if update:
-                with conn:
-                    c.execute(
-                        """
-                        SELECT date_of_birth
-                        FROM patient_record
-                        WHERE id = :id;
-                        """,
-                        { 'id': id }
-                    )
+                if self.name!='':
+                    with conn:
+                        c.execute(
+                            """
+                            SELECT date_of_birth
+                            FROM patient_record
+                            WHERE id = :id;
+                            """,
+                            { 'id': id }
+                        )
 
-                    # converts date of birth to the required format for age calculation
-                    dob = [int(d) for d in c.fetchone()[0].split('-')[::-1]]
-                    dob = date(dob[0], dob[1], dob[2])
-                    self.age = calculate_age(dob)
+                        # converts date of birth to the required format for age calculation
+                        dob = [int(d) for d in c.fetchone()[0].split('-')[::-1]]
+                        dob = date(dob[0], dob[1], dob[2])
+                        self.age = calculate_age(dob)
 
-                with conn:
-                    c.execute(
-                        """
-                        UPDATE patient_record
-                        SET age = :age, contact_number_1 = :phone_1,
-                        contact_number_2 = :phone_2, weight = :weight,
-                        height = :height, address = :address, city = :city,
-                        state = :state, pin_code = :pin,
-                        email_id = :email_id
-                        WHERE id = :id;
-                        """,
-                        {
-                            'id': id, 'age': self.age,
-                            'phone_1': self.contact_number_1,
-                            'phone_2': self.contact_number_2,
-                            'weight': self.weight, 'height': self.height,
-                            'address': self.address, 'city': self.city,
-                            'state': self.state, 'pin': self.pin_code,
-                            # 'kin_name': self.next_of_kin_name,
-                            # 'kin_relation': self.next_of_kin_relation_to_patient,
-                            # 'kin_phone': self.next_of_kin_contact_number,
-                            'email_id': self.email_id
-                        }
-                    )
-                st.success('Patient details updated successfully.')
-                conn.close()
+                    with conn:
+                        c.execute(
+                            """
+                            UPDATE patient_record
+                            SET age = :age, name = :name, contact_number_1 = :phone_1,
+                            contact_number_2 = :phone_2, weight = :weight,
+                            height = :height, address = :address, city = :city,
+                            state = :state, pin_code = :pin,
+                            email_id = :email_id
+                            WHERE id = :id;
+                            """,
+                            {
+                                'id': id, 'age': self.age, 'name': self.name,
+                                'phone_1': self.contact_number_1,
+                                'phone_2': self.contact_number_2,
+                                'weight': self.weight, 'height': self.height,
+                                'address': self.address, 'city': self.city,
+                                'state': self.state, 'pin': self.pin_code,
+                                # 'kin_name': self.next_of_kin_name,
+                                # 'kin_relation': self.next_of_kin_relation_to_patient,
+                                # 'kin_phone': self.next_of_kin_contact_number,
+                                'email_id': self.email_id
+                            }
+                        )
+                    st.success('Patient details updated successfully.')
+                    conn.close()
+                else:
+                    st.error('Please enter the data to update the record')
 
     # method to delete an existing patient record from the database
     def delete_patient(self):
