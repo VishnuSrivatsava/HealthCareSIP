@@ -72,7 +72,11 @@ def patients():
             
         elif option == option_list[2]:
             st.subheader('UPDATE PATIENT')
-            p.update_patient()
+            try:
+                p.update_patient()
+            except sql.IntegrityError:
+                st.error('Please enter the fields')
+            #p.update_patient()
         elif option == option_list[3]:
             st.subheader('DELETE PATIENT')
             try:
@@ -174,7 +178,7 @@ def departments():
 
             
         elif option == option_list[2]:
-            st.subheader('UPDATE DEPARTMENT')
+            st.subheader('UPDATE DEPARTMENT')            
             d.update_department()
         elif option == option_list[3]:
             st.subheader('DELETE DEPARTMENT')

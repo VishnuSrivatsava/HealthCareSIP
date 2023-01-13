@@ -98,8 +98,6 @@ class Doctor:
         st.write('Enter doctor details:')
         self.name = st.text_input('Full name')
         gender = st.radio('Gender', ['Female', 'Male', 'Other'])
-        if gender == 'Other':
-            gender = st.text_input('Please mention')
         self.gender = gender
         dob = st.date_input('Date of birth (YYYY/MM/DD)')
         st.info('If the required date is not in the calendar, please type it in the box above.')
@@ -123,43 +121,46 @@ class Doctor:
 
         # executing SQLite statements to save the new doctor record to the database
         if save:
-            conn, c = db.connection()
-            with conn:
-                c.execute(
-                    """
-                    INSERT INTO doctor_record
-                    (
-                        id, name, age, gender, date_of_birth,
-                        department_id, department_name, contact_number_1,
-                        email_id, specialisation, years_of_experience
+            if self.name!='':
+                conn, c = db.connection()
+                with conn:
+                    c.execute(
+                        """
+                        INSERT INTO doctor_record
+                        (
+                            id, name, age, gender, date_of_birth,
+                            department_id, department_name, contact_number_1,
+                            email_id, specialisation, years_of_experience
                         
+                        )
+                        VALUES (
+                            :id, :name, :age, :gender, :dob, :dept_id,
+                            :dept_name, :phone_1, :email_id, 
+                            :specialisation, :experience
+                        );
+                        """,
+                        {
+                            'id': self.id, 'name': self.name, 'age': self.age,
+                            'gender': self.gender, 'dob': self.date_of_birth,
+                            # 'blood_group': self.blood_group,
+                            'dept_id': self.department_id,
+                            'dept_name': self.department_name,
+                            'phone_1': self.contact_number_1,
+                            # 'phone_2': self.contact_number_2,
+                            # 'uid': self.aadhar_or_voter_id, 
+                            'email_id': self.email_id,
+                            # 'qualification': self.qualification,
+                            'specialisation': self.specialisation,
+                            'experience': self.years_of_experience,
+                            # 'address': self.address, 'city': self.city,
+                            # 'state': self.state, 'pin': self.pin_code
+                        }
                     )
-                    VALUES (
-                        :id, :name, :age, :gender, :dob, :dept_id,
-                        :dept_name, :phone_1, :email_id, 
-                        :specialisation, :experience
-                    );
-                    """,
-                    {
-                        'id': self.id, 'name': self.name, 'age': self.age,
-                        'gender': self.gender, 'dob': self.date_of_birth,
-                        # 'blood_group': self.blood_group,
-                        'dept_id': self.department_id,
-                        'dept_name': self.department_name,
-                        'phone_1': self.contact_number_1,
-                        # 'phone_2': self.contact_number_2,
-                        # 'uid': self.aadhar_or_voter_id, 
-                        'email_id': self.email_id,
-                        # 'qualification': self.qualification,
-                        'specialisation': self.specialisation,
-                        'experience': self.years_of_experience,
-                        # 'address': self.address, 'city': self.city,
-                        # 'state': self.state, 'pin': self.pin_code
-                    }
-                )
-            st.success('Doctor details saved successfully.')
-            st.write('Your Doctor ID is: ', self.id)
-            conn.close()
+                st.success('Doctor details saved successfully.')
+                st.write('Your Doctor ID is: ', self.id)
+                conn.close()
+            else:
+                st.error('Please enter the details to save')
 
     # method to update an existing doctor record in the database
     def update_doctor(self):
@@ -210,47 +211,50 @@ class Doctor:
 
             # executing SQLite statements to update this doctor's record in the database
             if update:
-                with conn:
-                    c.execute(
-                        """
-                        SELECT date_of_birth
-                        FROM doctor_record
-                        WHERE id = :id;
-                        """,
-                        { 'id': id }
-                    )
+                if self.name!='':
+                    with conn:
+                        c.execute(
+                            """
+                            SELECT date_of_birth
+                            FROM doctor_record
+                            WHERE id = :id;
+                            """,
+                            { 'id': id }
+                        )
 
-                    # converts date of birth to the required format for age calculation
-                    dob = [int(d) for d in c.fetchone()[0].split('-')[::-1]]
-                    dob = date(dob[0], dob[1], dob[2])
-                    self.age = calculate_age(dob)
+                        # converts date of birth to the required format for age calculation
+                        dob = [int(d) for d in c.fetchone()[0].split('-')[::-1]]
+                        dob = date(dob[0], dob[1], dob[2])
+                        self.age = calculate_age(dob)
 
-                with conn:
-                    c.execute(
-                        """
-                        UPDATE doctor_record
-                        SET age = :age, department_id = :dept_id,
-                        department_name = :dept_name, contact_number_1 = :phone_1,
-                         email_id = :email_id,
-                         specialisation = :specialisation,
-                        years_of_experience = :experience
-                        WHERE id = :id;
-                        """,
-                        {
-                            'id': id, 'age': self.age, 'dept_id': self.department_id,
-                            'dept_name': self.department_name,
-                            'phone_1': self.contact_number_1,
-                            # 'phone_2': self.contact_number_2,
-                             'email_id': self.email_id,
-                            # 'qualification': self.qualification,
-                            'specialisation': self.specialisation,
-                            'experience': self.years_of_experience,
-                            # 'address': self.address, 'city': self.city,
-                            # 'state': self.state, 'pin': self.pin_code
-                        }
-                    )
-                st.success('Doctor details updated successfully.')
-                conn.close()
+                    with conn:
+                        c.execute(
+                            """
+                            UPDATE doctor_record
+                            SET age = :age, name = :name, department_id = :dept_id,
+                            department_name = :dept_name, contact_number_1 = :phone_1,
+                            email_id = :email_id,
+                            specialisation = :specialisation,
+                            years_of_experience = :experience
+                            WHERE id = :id;
+                            """,
+                            {
+                                'id': id, 'age': self.age, 'dept_id': self.department_id,
+                                'dept_name': self.department_name,
+                                'phone_1': self.contact_number_1,
+                                # 'phone_2': self.contact_number_2,
+                                'email_id': self.email_id,
+                                # 'qualification': self.qualification,
+                                'specialisation': self.specialisation,
+                                'experience': self.years_of_experience,
+                                # 'address': self.address, 'city': self.city,
+                                # 'state': self.state, 'pin': self.pin_code
+                            }
+                        )
+                    st.success('Doctor details updated successfully.')
+                    conn.close()
+                else:
+                    st.error('Please Update the fields before save')
 
     # method to delete an existing doctor record from the database
     def delete_doctor(self):
