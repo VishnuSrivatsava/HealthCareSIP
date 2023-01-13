@@ -135,43 +135,40 @@ class Prescription:
 
         # executing SQLite statements to save the new prescription record to the database
         if save:
-            if self.patient_id!='':                
-                conn, c = db.connection()
-                with conn:
-                    c.execute(
-                        """
-                        INSERT INTO prescription_record
-                        (
-                            id, patient_id, patient_name, doctor_id,
-                            doctor_name, diagnosis, comments,
-                            medicine_1_name, medicine_1_dosage_description,
-                            medicine_2_name, medicine_2_dosage_description,
-                            medicine_3_name, medicine_3_dosage_description
-                        )
-                        VALUES (
-                            :id, :p_id, :p_name, :dr_id, :dr_name, :diagnosis,
-                            :comments, :med_1_name, :med_1_dose_desc, :med_2_name,
-                            :med_2_dose_desc, :med_3_name, :med_3_dose_desc
-                        );
-                        """,
-                        {
-                            'id': self.id, 'p_id': self.patient_id,
-                            'p_name': self.patient_name, 'dr_id': self.doctor_id,
-                            'dr_name': self.doctor_name, 'diagnosis': self.diagnosis,
-                            'comments': self.comments,
-                            'med_1_name': self.medicine_1_name,
-                            'med_1_dose_desc': self.medicine_1_dosage_description,
-                            'med_2_name': self.medicine_2_name,
-                            'med_2_dose_desc': self.medicine_2_dosage_description,
-                            'med_3_name': self.medicine_3_name,
-                            'med_3_dose_desc': self.medicine_3_dosage_description,
-                        }
+            conn, c = db.connection()
+            with conn:
+                c.execute(
+                    """
+                    INSERT INTO prescription_record
+                    (
+                        id, patient_id, patient_name, doctor_id,
+                        doctor_name, diagnosis, comments,
+                        medicine_1_name, medicine_1_dosage_description,
+                        medicine_2_name, medicine_2_dosage_description,
+                        medicine_3_name, medicine_3_dosage_description
                     )
-                st.success('Prescription details saved successfully.')
-                st.write('The Prescription ID is: ', self.id)
-                conn.close()
-            else:
-                st.error('Please enter prescription details')
+                    VALUES (
+                        :id, :p_id, :p_name, :dr_id, :dr_name, :diagnosis,
+                        :comments, :med_1_name, :med_1_dose_desc, :med_2_name,
+                        :med_2_dose_desc, :med_3_name, :med_3_dose_desc
+                    );
+                    """,
+                    {
+                        'id': self.id, 'p_id': self.patient_id,
+                        'p_name': self.patient_name, 'dr_id': self.doctor_id,
+                        'dr_name': self.doctor_name, 'diagnosis': self.diagnosis,
+                        'comments': self.comments,
+                        'med_1_name': self.medicine_1_name,
+                        'med_1_dose_desc': self.medicine_1_dosage_description,
+                        'med_2_name': self.medicine_2_name,
+                        'med_2_dose_desc': self.medicine_2_dosage_description,
+                        'med_3_name': self.medicine_3_name,
+                        'med_3_dose_desc': self.medicine_3_dosage_description,
+                    }
+                )
+            st.success('Prescription details saved successfully.')
+            st.write('The Prescription ID is: ', self.id)
+            conn.close()
 
     # method to update an existing prescription record in the database
     def update_prescription(self):
@@ -215,35 +212,32 @@ class Prescription:
 
             # executing SQLite statements to update this prescription's record in the database
             if update:
-                if self.patient_id!='' and self.doctor_id!='':
-                    with conn:
-                        c.execute(
-                            """
-                            UPDATE prescription_record
-                            SET diagnosis = :diagnosis, comments = :comments,
-                            medicine_1_name = :med_1_name,
-                            medicine_1_dosage_description = :med_1_dose_desc,
-                            medicine_2_name = :med_2_name,
-                            medicine_2_dosage_description = :med_2_dose_desc,
-                            medicine_3_name = :med_3_name,
-                            medicine_3_dosage_description = :med_3_dose_desc
-                            WHERE id = :id;
-                            """,
-                            {
-                                'id': id, 'diagnosis': self.diagnosis,
-                                'comments': self.comments,
-                                'med_1_name': self.medicine_1_name,
-                                'med_1_dose_desc': self.medicine_1_dosage_description,
-                                'med_2_name': self.medicine_2_name,
-                                'med_2_dose_desc': self.medicine_2_dosage_description,
-                                'med_3_name': self.medicine_3_name,
-                                'med_3_dose_desc': self.medicine_3_dosage_description
-                            }
-                        )
-                    st.success('Prescription details updated successfully.')
-                    conn.close()
-                else:
-                    st.error('Please enter the fields for updation')
+                with conn:
+                    c.execute(
+                        """
+                        UPDATE prescription_record
+                        SET diagnosis = :diagnosis, comments = :comments,
+                        medicine_1_name = :med_1_name,
+                        medicine_1_dosage_description = :med_1_dose_desc,
+                        medicine_2_name = :med_2_name,
+                        medicine_2_dosage_description = :med_2_dose_desc,
+                        medicine_3_name = :med_3_name,
+                        medicine_3_dosage_description = :med_3_dose_desc
+                        WHERE id = :id;
+                        """,
+                        {
+                            'id': id, 'diagnosis': self.diagnosis,
+                            'comments': self.comments,
+                            'med_1_name': self.medicine_1_name,
+                            'med_1_dose_desc': self.medicine_1_dosage_description,
+                            'med_2_name': self.medicine_2_name,
+                            'med_2_dose_desc': self.medicine_2_dosage_description,
+                            'med_3_name': self.medicine_3_name,
+                            'med_3_dose_desc': self.medicine_3_dosage_description
+                        }
+                    )
+                st.success('Prescription details updated successfully.')
+                conn.close()
 
     # method to delete an existing prescription record from the database
     def delete_prescription(self):
