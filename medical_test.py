@@ -143,37 +143,40 @@ class Medical_Test:
 
         # executing SQLite statements to save the new medical test record to the database
         if save:
-            conn, c = db.connection()
-            with conn:
-                c.execute(
-                    """
-                    INSERT INTO medical_test_record
-                    (
-                        id, test_name, patient_id, patient_name, doctor_id,
-                        doctor_name, medical_lab_scientist_id, test_date_time,
-                        result_date_time, cost, result_and_diagnosis, description,
-                        comments
+            if self.test_name!='':
+                conn, c = db.connection()
+                with conn:
+                    c.execute(
+                        """
+                        INSERT INTO medical_test_record
+                        (
+                            id, test_name, patient_id, patient_name, doctor_id,
+                            doctor_name, medical_lab_scientist_id, test_date_time,
+                            result_date_time, cost, result_and_diagnosis, description,
+                            comments
+                        )
+                        VALUES (
+                            :id, :name, :p_id, :p_name, :dr_id, :dr_name, :mls_id,
+                            :test_date_time, :result_date_time, :cost,
+                            :result_diagnosis, :desc, :comments
+                        );
+                        """,
+                        {
+                            'id': self.id, 'name': self.test_name,
+                            'p_id': self.patient_id, 'p_name': self.patient_name,
+                            'dr_id': self.doctor_id, 'dr_name': self.doctor_name,
+                            'mls_id': self.medical_lab_scientist_id,
+                            'test_date_time': self.test_date_time,
+                            'result_date_time': self.result_date_time, 'cost': self.cost,
+                            'result_diagnosis': self.result_and_diagnosis,
+                            'desc': self.description, 'comments': self.comments
+                        }
                     )
-                    VALUES (
-                        :id, :name, :p_id, :p_name, :dr_id, :dr_name, :mls_id,
-                        :test_date_time, :result_date_time, :cost,
-                        :result_diagnosis, :desc, :comments
-                    );
-                    """,
-                    {
-                        'id': self.id, 'name': self.test_name,
-                        'p_id': self.patient_id, 'p_name': self.patient_name,
-                        'dr_id': self.doctor_id, 'dr_name': self.doctor_name,
-                        'mls_id': self.medical_lab_scientist_id,
-                        'test_date_time': self.test_date_time,
-                        'result_date_time': self.result_date_time, 'cost': self.cost,
-                        'result_diagnosis': self.result_and_diagnosis,
-                        'desc': self.description, 'comments': self.comments
-                    }
-                )
-            st.success('Medical test details saved successfully.')
-            st.write('The Medical Test ID is: ', self.id)
-            conn.close()
+                st.success('Medical test details saved successfully.')
+                st.write('The Medical Test ID is: ', self.id)
+                conn.close()
+            else:
+                st.error('Please enter the medical test details')
 
     # method to update an existing medical test record in the database
     def update_medical_test(self):
@@ -198,9 +201,10 @@ class Medical_Test:
                 )
                 st.write('Here are the current details of the medical:')
                 show_medical_test_details(c.fetchall())
+                
 
-            st.write('Enter new details of the medical test:')
-            result_and_diagnosis = st.text_area('Result and diagnosis')
+            st.write('Enter new details of the medical test:')            
+            result_and_diagnosis = st.text_area('Result and diagnosis')            
             self.result_and_diagnosis = (lambda res_diag : 'Test result awaited' if res_diag == '' else res_diag)(result_and_diagnosis)
             description = st.text_area('Description')
             self.description = (lambda desc : None if desc == '' else desc)(description)
@@ -210,21 +214,24 @@ class Medical_Test:
 
             # executing SQLite statements to update this medical test's record in the database
             if update:
-                with conn:
-                    c.execute(
-                        """
-                        UPDATE medical_test_record
-                        SET result_and_diagnosis = :result_diagnosis,
-                        description = :description, comments = :comments
-                        WHERE id = :id;
-                        """,
-                        {
-                            'id': id, 'result_diagnosis': self.result_and_diagnosis,
-                            'description': self.description, 'comments': self.comments
-                        }
-                    )
-                st.success('Medical test details updated successfully.')
-                conn.close()
+                if self.result_and_diagnosis!='':
+                    with conn:
+                        c.execute(
+                            """
+                            UPDATE medical_test_record
+                            SET result_and_diagnosis = :result_diagnosis,
+                            description = :description, comments = :comments
+                            WHERE id = :id;
+                            """,
+                            {
+                                'id': id, 'result_diagnosis': self.result_and_diagnosis,
+                                'description': self.description, 'comments': self.comments
+                            }
+                        )
+                    st.success('Medical test details updated successfully.')
+                    conn.close()
+                else:
+                    st.error('Please enter the fields')
 
     # method to delete an existing medical test record from the database
     def delete_medical_test(self):
