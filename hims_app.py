@@ -221,7 +221,7 @@ with col2:
 with col3:
     st.write(' ')
 
-st.markdown("<h1 style='text-align: center; color: white;'>HEALTHCARE DATABASE</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: white;'>MEDICAL INFORMATION REPOSITORY</h1>", unsafe_allow_html=True)
 
 password = st.sidebar.text_input('Enter password', type = 'password')       # user password authentication
 if password == config.password:
